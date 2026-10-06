@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f7fc">
+  <title>Tableau de bord · Think Tank RDC Stratégie</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --blue: #2868ad;
+      --ink: #17243a;
+      --muted: #6d7b90;
+      --border: #e2e8f0;
+      --surface: #fff;
+      --page: #f4f7fc;
+      font-family: "DM Sans", "Segoe UI", Arial, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--page); color: var(--ink); }
+    button, input, select { font: inherit; }
+    header { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:18px max(20px,calc((100vw - 1200px)/2)); background:#fff; border-bottom:1px solid var(--border); }
+    .brand { display:flex; align-items:center; gap:14px; min-width:0; }
+    .brand img { display:block; width:min(220px,42vw); height:auto; }
+    .brand-label { padding-left:14px; border-left:1px solid var(--border); color:var(--muted); font-size:12px; line-height:1.5; }
+    .header-actions { display:flex; align-items:center; gap:18px; }
+    .site-link { flex-shrink:0; color:var(--blue); text-decoration:none; font-size:13px; font-weight:700; }
+    main { max-width:1200px; margin:0 auto; padding:38px 24px 60px; }
+    .eyebrow { margin:0 0 8px; color:var(--blue); font-size:11px; font-weight:700; letter-spacing:1.8px; text-transform:uppercase; }
+    h1 { margin:0; font-size:clamp(27px,4vw,38px); letter-spacing:-1.2px; }
+    .intro { margin:10px 0 25px; color:var(--muted); font-size:14px; line-height:1.65; }
+    .notice { display:flex; gap:12px; align-items:flex-start; padding:15px 17px; margin:0 0 24px; border:1px solid #ecdca9; border-radius:13px; background:#fffaf0; color:#71591d; font-size:12px; line-height:1.6; }
+    .notice strong { display:block; margin-bottom:3px; }
+    .stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; margin-bottom:24px; }
+    .stat { padding:19px 20px; border:1px solid var(--border); border-radius:15px; background:var(--surface); box-shadow:0 5px 18px #1b35530a; }
+    .stat-label { color:var(--muted); font-size:12px; }
+    .stat-value { display:block; margin-top:9px; font-size:30px; font-weight:700; letter-spacing:-1px; }
+    .toolbar { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:17px 18px; border:1px solid var(--border); border-bottom:0; border-radius:16px 16px 0 0; background:#fff; }
+    .toolbar h2 { margin:0; font-size:16px; }
+    .controls { display:flex; align-items:center; gap:10px; }
+    .controls input,.controls select { min-height:40px; border:1px solid var(--border); border-radius:9px; background:#fff; padding:0 12px; color:var(--ink); font-size:12px; }
+    .controls input { width:min(280px,30vw); }
+    .controls input:focus,.controls select:focus { outline:2px solid #2868ad35; border-color:var(--blue); }
+    .export { min-height:40px; border:0; border-radius:9px; padding:0 14px; background:var(--blue); color:#fff; font-size:12px; font-weight:700; cursor:pointer; }
+    .export:disabled { cursor:not-allowed; opacity:.5; }
+    .refresh { min-height:40px; border:1px solid var(--border); border-radius:9px; padding:0 12px; background:#fff; color:var(--ink); font-size:12px; font-weight:700; cursor:pointer; }
+    .table-wrap { overflow-x:auto; border:1px solid var(--border); border-radius:0 0 16px 16px; background:#fff; }
+    table { width:100%; min-width:900px; border-collapse:collapse; text-align:left; }
+    th,td { padding:14px 16px; border-bottom:1px solid #edf0f5; vertical-align:top; font-size:12px; }
+    th { color:var(--muted); background:#fafbfd; font-size:10px; font-weight:700; letter-spacing:.7px; text-transform:uppercase; }
+    tbody tr:last-child td { border-bottom:0; }
+    td strong { display:block; margin-bottom:4px; font-size:12px; }
+    .secondary { color:var(--muted); font-size:11px; line-height:1.6; }
+    .badge { display:inline-block; border-radius:20px; padding:5px 9px; background:#eaf2fd; color:#285d99; font-size:10px; font-weight:700; white-space:nowrap; }
+    .empty { padding:45px 20px; color:var(--muted); text-align:center; font-size:13px; line-height:1.7; }
+    .status { min-height:19px; margin:12px 2px 0; color:#a23a2d; font-size:12px; }
+    .updated { margin:13px 2px 0; color:var(--muted); font-size:10px; }
+    .dashboard-layout { max-width:1200px; margin:0 auto; padding:24px 24px 50px; }
+    .dashboard-nav { display:flex; align-items:center; gap:8px; margin:0 0 30px; padding:8px; border:1px solid var(--border); border-radius:13px; background:#fff; }
+    .dashboard-nav a { padding:10px 14px; border-radius:8px; color:var(--muted); text-decoration:none; font-size:12px; font-weight:700; }
+    .dashboard-nav a:hover,.dashboard-nav a:focus-visible,.dashboard-nav a[aria-current="page"] { background:#eaf2fd; color:#245991; outline:none; }
+    .dashboard-nav .nav-spacer { flex:1; }
+    .dashboard-content { min-width:0; width:100%; margin:0 auto; }
+    .overview-banner { margin:0 0 24px; padding:0; background:transparent; }
+    .overview-title { margin:0 0 14px; color:var(--muted); text-align:left; font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; }
+    .overview-banner .stats { grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; margin:0; }
+    .overview-banner .stat { position:relative; min-height:112px; padding:19px 20px; overflow:hidden; border:1px solid var(--border); border-radius:15px; background:#fff; box-shadow:0 5px 18px #1b35530a; }
+    .overview-banner .stat::before { content:""; position:absolute; inset:0 auto 0 0; width:4px; background:#2868ad; }
+    .overview-banner .stat:nth-child(2)::before { background:#e1b437; }
+    .overview-banner .stat:nth-child(3)::before { background:#4d9b79; }
+    .overview-banner .stat:nth-child(4)::before { background:#8091a8; }
+    .overview-banner .stat-label { font-size:11px; font-weight:600; }
+    .overview-banner .stat-value { margin-top:12px; color:#245991; font-size:32px; }
+    .interest { min-width:120px; }
+    .interest-bar { width:100%; height:6px; margin:0 0 6px; overflow:hidden; border-radius:10px; background:#e4e9f0; }
+    .interest-bar span { display:block; height:100%; border-radius:inherit; background:#2868ad; }
+    .interest .secondary { font-size:10px; }
+    .status-badge { display:inline-block; border-radius:18px; padding:6px 9px; background:#eaf2fd; color:#285d99; font-size:10px; font-weight:700; }
+    .row-actions { display:flex; gap:7px; white-space:nowrap; }
+    .row-action { border:1px solid var(--border); border-radius:7px; padding:7px 9px; background:#fff; color:var(--blue); font-size:11px; font-weight:700; cursor:pointer; }
+    .row-action:hover,.row-action:focus-visible { border-color:var(--blue); outline:2px solid #2868ad20; }
+    .row-action.delete { color:#a23a2d; }
+    .details-dialog { width:min(620px,calc(100% - 32px)); max-height:min(85vh,800px); padding:0; overflow:auto; border:0; border-radius:17px; color:var(--ink); box-shadow:0 24px 80px #09142655; }
+    .details-dialog::backdrop { background:#111c2bcc; }
+    .dialog-header { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; padding:22px 24px; border-bottom:1px solid var(--border); }
+    .dialog-header h2 { margin:0; font-size:20px; }
+    .dialog-header p { margin:6px 0 0; color:var(--muted); font-size:12px; }
+    .dialog-close { border:1px solid var(--border); border-radius:8px; padding:7px 10px; background:#fff; color:var(--ink); cursor:pointer; }
+    .details-list { display:grid; grid-template-columns:1fr 1fr; gap:0 20px; padding:10px 24px 18px; }
+    .details-list div { padding:12px 0; border-bottom:1px solid #edf0f5; }
+    .details-list dt { margin-bottom:5px; color:var(--muted); font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; }
+    .details-list dd { margin:0; overflow-wrap:anywhere; font-size:13px; line-height:1.5; }
+    .dialog-actions { display:flex; justify-content:flex-end; gap:9px; padding:16px 24px 21px; }
+    .dialog-actions button { min-height:40px; border:1px solid var(--border); border-radius:9px; padding:0 14px; background:#fff; color:var(--ink); font-weight:700; cursor:pointer; }
+    .dialog-actions .delete-confirm { border-color:#a23a2d; background:#a23a2d; color:#fff; }
+    main { max-width:none; margin:0; padding:0; }
+    @media(max-width:720px) {
+      header { padding:15px 18px; }
+      .brand-label { display:none; }
+      .header-actions { gap:10px; }
+      .header-actions .site-link:first-child { display:none; }
+      .dashboard-layout { margin:0 auto; padding:18px 16px 40px; }
+      .dashboard-nav { overflow-x:auto; margin-bottom:24px; white-space:nowrap; }
+      .dashboard-nav a { flex:0 0 auto; padding:9px 11px; }
+      main { padding:0; }
+      .stats { gap:10px; }
+      .stat { padding:15px 13px; }
+      .stat-value { font-size:25px; }
+      .overview-banner { padding:14px; }
+      .overview-banner .stats { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .toolbar { align-items:flex-start; flex-direction:column; }
+      .controls { width:100%; flex-wrap:wrap; }
+      .controls input { flex:1 1 180px; width:auto; }
+      .controls select { flex:1 1 130px; }
+    }
+    @media(max-width:420px) {
+      .overview-banner .stats { grid-template-columns:1fr 1fr; }
+      .overview-banner .stat { display:block; min-height:82px; padding:14px; }
+      .overview-banner .stat-value { margin-top:6px; font-size:23px; }
+      .site-link { font-size:11px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <img src="logo partenaires (2).png" alt="Think Tank RDC Stratégie">
+      <span class="brand-label">TABLEAU DE BORD<br>RENCONTRE · PARIS 2026</span>
+    </div>
+    <div class="header-actions">
+      <a class="site-link" href="index.html#inscription">← Formulaire</a>
+      <a class="site-link" href="index.html">Retour au site ↗</a>
+    </div>
+  </header>
+  <div class="dashboard-layout">
+    <nav class="dashboard-nav" aria-label="Navigation du tableau de bord">
+      <a href="#overview" aria-current="page">Vue d’ensemble</a>
+      <a href="#registrations-title">Inscriptions</a>
+      <a href="#registrations-title" id="books-nav">Achats de livres</a>
+      <span class="nav-spacer"></span>
+      <span class="badge">PARIS · 2026</span>
+    </nav>
+    <main class="dashboard-content" id="overview">
+    <p class="eyebrow">Administration des inscriptions</p>
+    <h1>Tableau de bord</h1>
+    <p class="intro">Suivi des participants à la conférence-dédicace · Paris 2026</p>
+    <div class="notice" role="alert">
+      <span aria-hidden="true">ⓘ</span>
+    <div><strong>Accès public sans connexion</strong>Les données personnelles des participants (nom, e-mail, WhatsApp et choix de livre) sont visibles par toute personne pouvant ouvrir ce dashboard. Toute personne peut également supprimer des inscriptions.</div>
+    </div>
+    <section class="overview-banner" aria-labelledby="overview-title">
+      <h2 class="overview-title" id="overview-title">Point sur les inscriptions</h2>
+      <div class="stats" aria-label="Statistiques des inscriptions">
+        <article class="stat"><span class="stat-label">Total inscrits</span><strong class="stat-value" id="total-count">0</strong></article>
+        <article class="stat"><span class="stat-label">Achat souhaité</span><strong class="stat-value" id="book-count">0</strong></article>
+        <article class="stat"><span class="stat-label">Sans achat</span><strong class="stat-value" id="no-book-count">0</strong></article>
+        <article class="stat"><span class="stat-label">Dernières 24 h</span><strong class="stat-value" id="recent-count">0</strong></article>
+      </div>
+    </section>
+    <section aria-labelledby="registrations-title">
+      <div class="toolbar">
+        <h2 id="registrations-title">Liste des inscriptions</h2>
+        <div class="controls">
+          <input id="search" type="search" aria-label="Rechercher une inscription" placeholder="Nom, e-mail, téléphone…">
+          <select id="book-filter" aria-label="Filtrer selon l’achat d’un livre">
+            <option value="all">Tous les inscrits</option>
+            <option value="yes">Avec achat de livre</option>
+            <option value="no">Sans achat de livre</option>
+          </select>
+          <button class="refresh" id="refresh" type="button">Actualiser</button>
+          <button class="export" id="export-csv" type="button" disabled>Exporter CSV ↓</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Participant</th><th>Contact</th><th>Statut</th><th>Intention d’achat</th><th>Date</th><th>Référence</th><th>Actions</th></tr></thead>
+          <tbody id="registrations"></tbody>
+        </table>
+        <div class="empty" id="empty-state" hidden></div>
+      </div>
+      <p class="status" id="status" role="alert" hidden></p>
+      <p class="updated" id="updated"></p>
+    </section>
+    </main>
+  </div>
+  <dialog class="details-dialog" id="details-dialog" aria-labelledby="details-title">
+    <div class="dialog-header">
+      <div><h2 id="details-title">Détail de l’inscription</h2><p id="details-subtitle"></p></div>
+      <button class="dialog-close" id="close-details" type="button" aria-label="Fermer">Fermer</button>
+    </div>
+    <dl class="details-list" id="details-list"></dl>
+    <div class="dialog-actions">
+      <button type="button" id="close-details-secondary">Fermer</button>
+      <button class="delete-confirm" type="button" id="delete-from-details">Supprimer l’enregistrement</button>
+    </div>
+  </dialog>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-config.js"></script>
+  <script>
+    'use strict';
+    const config = window.APP_SUPABASE_CONFIG;
+    const supabaseClient = window.supabase?.createClient && config?.url && !config.url.includes('YOUR-') && config?.publishableKey && !config.publishableKey.includes('YOUR_')
+      ? window.supabase.createClient(config.url, config.publishableKey)
+      : null;
+    const setupNotice = 'Configurez l’URL Supabase et la clé publique dans supabase-config.js.';
+    const tableBody = document.getElementById('registrations');
+    const emptyState = document.getElementById('empty-state');
+    const status = document.getElementById('status');
+    const search = document.getElementById('search');
+    const bookFilter = document.getElementById('book-filter');
+    const exportButton = document.getElementById('export-csv');
+    let registrations = [];
+    let selectedRegistration = null;
+
+    async function readRegistrations() {
+      status.hidden = true;
+      document.getElementById('updated').textContent = 'Chargement des inscriptions…';
+      if (!supabaseClient) {
+        registrations = [];
+        status.textContent = setupNotice;
+        status.hidden = false;
+        render();
+        document.getElementById('updated').textContent = 'Supabase non configuré.';
+        return;
+      }
+      let loadFailed = false;
+      try {
+        const { data, error } = await supabaseClient
+          .from('registrations')
+          .select('id,reference,nom_complet,sexe,profil_fonction,whatsapp,email,achat_livre,choix_livre,created_at')
+          .order('created_at', { ascending: false });
+        if (error) throw error;
+        registrations = data;
+      } catch (error) {
+        registrations = [];
+        loadFailed = true;
+        console.error('Chargement Supabase impossible:', error);
+        status.textContent = error instanceof Error ? error.message : 'Impossible de charger les inscriptions Supabase.';
+        status.hidden = false;
+      }
+      render();
+      document.getElementById('updated').textContent = loadFailed
+        ? 'Échec du chargement.'
+        : 'Actualisé le ' + new Date().toLocaleString('fr-FR');
+    }
+
+    function text(value, fallback = '—') {
+      return typeof value === 'string' && value.trim() ? value.trim() : fallback;
+    }
+
+    function dateValue(value) {
+      if (typeof value !== 'string') return 0;
+      const time = Date.parse(value);
+      return Number.isFinite(time) ? time : 0;
+    }
+
+    function formatDate(value) {
+      const time = dateValue(value);
+      return time ? new Date(time).toLocaleString('fr-FR') : '—';
+    }
+
+    function filteredRegistrations() {
+      const query = search.value.trim().toLocaleLowerCase('fr-FR');
+      const filter = bookFilter.value;
+      return registrations
+        .filter(item => {
+          const fields = [item.nom_complet, item.email, item.whatsapp, item.profil_fonction, item.reference];
+          const matchesQuery = !query || fields.some(value => typeof value === 'string' && value.toLocaleLowerCase('fr-FR').includes(query));
+          const hasBook = item.achat_livre === 'oui';
+          return matchesQuery && (filter === 'all' || (filter === 'yes' ? hasBook : !hasBook));
+        })
+        .sort((a, b) => dateValue(b.created_at) - dateValue(a.created_at));
+    }
+
+    function addCell(row, content, className) {
+      const cell = document.createElement('td');
+      if (className) cell.className = className;
+      cell.textContent = content;
+      row.append(cell);
+      return cell;
+    }
+
+    function openDetails(item) {
+      selectedRegistration = item;
+      const dialog = document.getElementById('details-dialog');
+      document.getElementById('details-subtitle').textContent = text(item.nom_complet);
+      const details = [
+        ['Nom complet', item.nom_complet],
+        ['Sexe', item.sexe],
+        ['Profil / Fonction', item.profil_fonction],
+        ['WhatsApp', item.whatsapp],
+        ['Adresse e-mail', item.email],
+        ['Achat de livre sur place', item.achat_livre === 'oui' ? 'Oui' : 'Non'],
+        ['Livre choisi', item.choix_livre],
+        ['Référence', item.reference],
+        ['Date d’inscription', formatDate(item.created_at)]
+      ];
+      const list = document.getElementById('details-list');
+      list.replaceChildren();
+      for (const [label, value] of details) {
+        const itemElement = document.createElement('div');
+        const term = document.createElement('dt');
+        term.textContent = label;
+        const description = document.createElement('dd');
+        description.textContent = text(value);
+        itemElement.append(term, description);
+        list.append(itemElement);
+      }
+      dialog.showModal();
+    }
+
+    async function deleteRegistration(item) {
+      const index = registrations.indexOf(item);
+      if (index < 0) {
+        status.textContent = 'Cet enregistrement n’est plus présent dans la liste. Actualisez le tableau.';
+        status.hidden = false;
+        return;
+      }
+      const name = text(item.nom_complet, 'cet enregistrement');
+      if (!window.confirm('Supprimer définitivement l’inscription de « ' + name + ' » ? Cette suppression sera visible pour tous.')) return;
+      try {
+        const { error } = await supabaseClient.from('registrations').delete().eq('id', item.id);
+        if (error) throw error;
+      } catch (error) {
+        status.textContent = error instanceof Error ? 'La suppression a échoué : ' + error.message : 'La suppression Supabase a échoué.';
+        status.hidden = false;
+        return;
+      }
+      registrations = registrations.filter((_, currentIndex) => currentIndex !== index);
+      selectedRegistration = null;
+      document.getElementById('details-dialog').close();
+      status.hidden = true;
+      render();
+    }
+
+    function render() {
+      const filtered = filteredRegistrations();
+      document.getElementById('total-count').textContent = String(registrations.length);
+      const bookCount = registrations.filter(item => item.achat_livre === 'oui').length;
+      document.getElementById('book-count').textContent = String(bookCount);
+      document.getElementById('no-book-count').textContent = String(registrations.length - bookCount);
+      const since = Date.now() - 24 * 60 * 60 * 1000;
+      document.getElementById('recent-count').textContent = String(registrations.filter(item => {
+        const created = dateValue(item.created_at);
+        return created >= since && created <= Date.now();
+      }).length);
+      tableBody.replaceChildren();
+      for (const item of filtered) {
+        const row = document.createElement('tr');
+        const participant = addCell(row, '');
+        const name = document.createElement('strong');
+        name.textContent = text(item.nom_complet);
+        participant.append(name);
+        const sex = document.createElement('span');
+        sex.className = 'secondary';
+        sex.textContent = text(item.profil_fonction, text(item.sexe));
+        participant.append(sex);
+        const contact = addCell(row, '');
+        const email = document.createElement('strong');
+        email.textContent = text(item.email);
+        contact.append(email);
+        const phone = document.createElement('span');
+        phone.className = 'secondary';
+        phone.textContent = text(item.whatsapp);
+        contact.append(phone);
+        const registrationStatus = addCell(row, '');
+        const statusBadge = document.createElement('span');
+        statusBadge.className = 'status-badge';
+        statusBadge.textContent = 'Inscription reçue';
+        registrationStatus.append(statusBadge);
+        const book = addCell(row, '');
+        book.className = 'interest';
+        const bar = document.createElement('div');
+        bar.className = 'interest-bar';
+        const fill = document.createElement('span');
+        fill.style.width = item.achat_livre === 'oui' ? '100%' : '0%';
+        bar.append(fill);
+        book.append(bar);
+        const bookLabel = document.createElement('span');
+        bookLabel.className = 'secondary';
+        bookLabel.textContent = item.achat_livre === 'oui' ? text(item.choix_livre, 'Achat souhaité') : 'Aucun livre souhaité';
+        book.append(bookLabel);
+        addCell(row, formatDate(item.created_at));
+        addCell(row, text(item.reference));
+        const actionCell = addCell(row, '');
+        actionCell.className = 'row-actions';
+        const detailsButton = document.createElement('button');
+        detailsButton.type = 'button';
+        detailsButton.className = 'row-action';
+        detailsButton.textContent = 'Détails';
+        detailsButton.setAttribute('aria-label', 'Voir le détail de ' + text(item.nom_complet));
+        detailsButton.addEventListener('click', () => openDetails(item));
+        const deleteButton = document.createElement('button');
+        deleteButton.type = 'button';
+        deleteButton.className = 'row-action delete';
+        deleteButton.textContent = 'Supprimer';
+        deleteButton.setAttribute('aria-label', 'Supprimer l’inscription de ' + text(item.nom_complet));
+        deleteButton.addEventListener('click', () => deleteRegistration(item));
+        actionCell.append(detailsButton, deleteButton);
+        tableBody.append(row);
+      }
+      emptyState.hidden = filtered.length > 0;
+      if (filtered.length === 0) {
+        emptyState.textContent = registrations.length === 0
+          ? 'Aucune inscription enregistrée dans Supabase pour le moment.'
+          : 'Aucun résultat ne correspond à votre recherche ou à ce filtre.';
+      }
+      exportButton.disabled = filtered.length === 0;
+      exportButton.textContent = filtered.length === 0 ? 'Exporter CSV ↓' : 'Exporter ' + filtered.length + ' CSV ↓';
+    }
+
+    function csvCell(value) {
+      let safe = String(value ?? '');
+      if (/^[\t\r ]*[=+\-@]/.test(safe)) safe = "'" + safe;
+      return '"' + safe.replace(/"/g, '""') + '"';
+    }
+
+    search.addEventListener('input', render);
+    bookFilter.addEventListener('change', render);
+    document.getElementById('refresh').addEventListener('click', readRegistrations);
+    document.getElementById('close-details').addEventListener('click', () => document.getElementById('details-dialog').close());
+    document.getElementById('close-details-secondary').addEventListener('click', () => document.getElementById('details-dialog').close());
+    document.getElementById('delete-from-details').addEventListener('click', () => {
+      if (selectedRegistration) deleteRegistration(selectedRegistration);
+    });
+    document.getElementById('books-nav').addEventListener('click', () => {
+      bookFilter.value = 'yes';
+      render();
+    });
+    exportButton.addEventListener('click', () => {
+      const columns = [
+        ['reference', 'Référence'],
+        ['nom_complet', 'Nom complet'],
+        ['sexe', 'Sexe'],
+        ['profil_fonction', 'Profil / Fonction'],
+        ['whatsapp', 'WhatsApp'],
+        ['email', 'Adresse e-mail'],
+        ['achat_livre', 'Achat livre'],
+        ['choix_livre', 'Livre choisi'],
+        ['created_at', 'Date d’inscription']
+      ];
+      const rows = filteredRegistrations().map(item => columns.map(([key]) => key === 'created_at' ? formatDate(item[key]) : text(item[key], '')).map(csvCell).join(';'));
+      const csv = '\uFEFF' + columns.map(([, label]) => csvCell(label)).join(';') + '\r\n' + rows.join('\r\n');
+      const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'inscriptions-paris-2026.csv';
+      document.body.append(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    });
+
+    readRegistrations();
+  </script>
+</body>
+</html>
