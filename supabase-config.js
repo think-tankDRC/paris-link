@@ -1,4 +1,4 @@
 window.APP_SUPABASE_CONFIG = {
-  url: 'https://ofcdlvnvawdavrdroznn.supabase.co',
-  publishableKey: 'sb_publishable_8rYruUfVftUTwVZ70yIdGQ_Se9SoFl6'
+  url: 'https://vioqesaqlejamzzyohvt.supabase.co',
+  publishableKey: 'sb_publishable_UxJ9JCrAxt_DimqG4z6kRQ_0Qd8SQtJ'
 };
